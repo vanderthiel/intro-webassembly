@@ -2,6 +2,6 @@
 <script>
   Module.onRuntimeInitialized = _ => {
     const fib = Module.cwrap('fib', 'number', ['number']);
-    console.log(fib(12));
+    console.log(`12th fibonacci: ${fib(12)}`);
   };
 </script>

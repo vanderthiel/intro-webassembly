@@ -4,10 +4,12 @@
     // Load image
     const imgBlob = await fetch(src).then(resp => resp.blob());
     const img = await createImageBitmap(imgBlob);
+
     // Make canvas same size as image
     const canvas = document.createElement('canvas');
     canvas.width = img.width;
     canvas.height = img.height;
+
     // Draw image onto canvas
     const ctx = canvas.getContext('2d');
     ctx.drawImage(img, 0, 0);
@@ -15,36 +17,45 @@
   }
 
   Module.onRuntimeInitialized = async _ => {
+    // js: All exposed functions for the WebP C library
     const api = {
-      version: Module.cwrap('version', 'number', []),
-      create_buffer: Module.cwrap('create_buffer', 'number', ['number', 'number']),
-      destroy_buffer: Module.cwrap('destroy_buffer', '', ['number']),
-	  encode: Module.cwrap('encode', '', ['number', 'number', 'number', 'number']),
-	  free_result: Module.cwrap('free_result', '', ['number']),
-	  get_result_pointer: Module.cwrap('get_result_pointer', 'number', []),
-	  get_result_size: Module.cwrap('get_result_size', 'number', []),
+      version:            Module.cwrap('version',             'number', []),
+      create_buffer:      Module.cwrap('create_buffer',       'number', ['number', 'number']),
+      destroy_buffer:     Module.cwrap('destroy_buffer',      '',       ['number']),
+	    encode:             Module.cwrap('encode',              '',       ['number', 'number', 'number', 'number']),
+	    free_result:        Module.cwrap('free_result',         '',       ['number']),
+  	  get_result_pointer: Module.cwrap('get_result_pointer',  'number', []),
+	    get_result_size:    Module.cwrap('get_result_size',     'number', []),
     };
-	
+    
+    // js + c: The hello world example
     console.log(`Api version: ${api.version().toString(16)}`);
-	
-	const image = await loadImage('/image.jpg');
+    
+    // js: Create an ImageData object in JavaScript
+	  const image = await loadImage('/image.jpg');
+
+    // c: Create a new buffer, return value is a pointer to memory address
     const p = api.create_buffer(image.width, image.height);
+
+    // js + c: Add image data at memory address
     Module.HEAP8.set(image.data, p);
     
-	// ... call encoder ...
-	api.encode(p, image.width, image.height, 100);
+  	// c: Call encoder
+	  api.encode(p, image.width, image.height, 100);
+    // c: get the result
     const resultPointer = api.get_result_pointer();
     const resultSize = api.get_result_size();
     const resultView = new Uint8Array(Module.HEAP8.buffer, resultPointer, resultSize);
     const result = new Uint8Array(resultView);
+    // c: free all claimed memory for buffer and result
     api.free_result(resultPointer);
-	
     api.destroy_buffer(p);
-	
-	const blob = new Blob([result], {type: 'image/webp'});
+    
+    // js: Show the resultant WebP image in an image element on page
+	  const blob = new Blob([result], {type: 'image/webp'});
     const blobURL = URL.createObjectURL(blob);
     const img = document.createElement('img');
     img.src = blobURL;
-    document.body.appendChild(img)
+    document.body.appendChild(img);
   };
 </script>
