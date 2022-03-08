@@ -42,3 +42,18 @@ docker run --rm -v $(pwd):/src trzeci/emscripten emcc -O3 -s WASM=1 -s EXTRA_EXP
 
 Now start a webserver from this directory:
 `http-server`
+
+## Getting started
+
+Best is of course to get started yourself, these links should help.
+
+- Information
+  - https://webassembly.org/
+  - https://developer.mozilla.org/en-US/docs/WebAssembly
+  - https://github.com/appcypher/awesome-wasm-langs
+  - https://en.wikipedia.org/wiki/WebAssembly
+  - https://dotnet.microsoft.com/en-us/apps/aspnet/web-apps/blazor
+- Examples
+  - https://wasmbyexample.dev/
+  - https://madewithwebassembly.com/
+  - https://worldofwasm.bubbleapps.io/
